@@ -13,7 +13,9 @@ export interface ApiService {
 
   // Active games (for spectating)
   // id is optional: omit on first call and use the server-returned id for updates
-  upsertActiveGame(game: Omit<ActiveGame, "id" | "username" | "updatedAt"> & { id?: string }): Promise<ActiveGame>;
+  upsertActiveGame(
+    game: Omit<ActiveGame, "id" | "username" | "updatedAt"> & { id?: string },
+  ): Promise<ActiveGame>;
   endActiveGame(id: string): Promise<void>;
   listActiveGames(): Promise<ActiveGame[]>;
   getActiveGame(id: string): Promise<ActiveGame | null>;

@@ -17,11 +17,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getApi().currentSession().then((s) => {
-      setUser(s?.user ?? null);
-      setAuthToken(s?.token ?? null);
-      setLoading(false);
-    });
+    getApi()
+      .currentSession()
+      .then((s) => {
+        setUser(s?.user ?? null);
+        setAuthToken(s?.token ?? null);
+        setLoading(false);
+      });
   }, []);
 
   const value: AuthCtx = {

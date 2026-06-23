@@ -6,7 +6,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Snake Arena — Play, Compete, Spectate" },
-      { name: "description", content: "A modern Snake game with walls and wrap-around modes, leaderboards, and live spectating." },
+      {
+        name: "description",
+        content:
+          "A modern Snake game with walls and wrap-around modes, leaderboards, and live spectating.",
+      },
     ],
   }),
   component: Home,
@@ -27,22 +31,35 @@ function Home() {
             Two modes. Global leaderboards. Watch others play live.
           </p>
           <div className="mt-8 flex gap-3 justify-center">
-            <Link to="/play" className="px-6 py-3 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition">
+            <Link
+              to="/play"
+              className="px-6 py-3 rounded-md bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
+            >
               Play now
             </Link>
-            <Link to="/watch" className="px-6 py-3 rounded-md border border-border hover:bg-accent transition">
+            <Link
+              to="/watch"
+              className="px-6 py-3 rounded-md border border-border hover:bg-accent transition"
+            >
               Watch live
             </Link>
           </div>
           {!user && (
             <p className="mt-4 text-sm text-muted-foreground">
-              <Link to="/auth" className="underline hover:text-foreground">Sign in</Link> to save your scores.
+              <Link to="/auth" className="underline hover:text-foreground">
+                Sign in
+              </Link>{" "}
+              to save your scores.
             </p>
           )}
         </section>
 
         <section className="mt-20 grid sm:grid-cols-2 gap-4">
-          <ModeCard title="Walls" desc="Hit a wall, game over. Classic and unforgiving." badge="Hard" />
+          <ModeCard
+            title="Walls"
+            desc="Hit a wall, game over. Classic and unforgiving."
+            badge="Hard"
+          />
           <ModeCard title="Wrap" desc="Edges loop around. Plan in cycles." badge="Chill" />
         </section>
       </main>
@@ -55,7 +72,9 @@ function ModeCard({ title, desc, badge }: { title: string; desc: string; badge: 
     <div className="p-6 rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold">{title}</h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground">{badge}</span>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground">
+          {badge}
+        </span>
       </div>
       <p className="mt-2 text-muted-foreground">{desc}</p>
     </div>

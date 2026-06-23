@@ -1,7 +1,10 @@
 import type { GameMode } from "@/services/types";
 
 export type Dir = "up" | "down" | "left" | "right";
-export interface Point { x: number; y: number }
+export interface Point {
+  x: number;
+  y: number;
+}
 
 export interface GameState {
   snake: Point[]; // head at [0]
@@ -42,7 +45,11 @@ export function createGame(mode: GameMode, gridSize = 20): GameState {
   };
 }
 
-export function spawnFood(snake: Point[], gridSize: number, rng: () => number = Math.random): Point {
+export function spawnFood(
+  snake: Point[],
+  gridSize: number,
+  rng: () => number = Math.random,
+): Point {
   const occupied = new Set(snake.map((p) => `${p.x},${p.y}`));
   const free: Point[] = [];
   for (let x = 0; x < gridSize; x++) {

@@ -80,7 +80,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Snake Arena" },
-      { name: "description", content: "Play Snake in walls or wrap mode, compete on the leaderboard, and spectate live games." },
+      {
+        name: "description",
+        content:
+          "Play Snake in walls or wrap mode, compete on the leaderboard, and spectate live games.",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

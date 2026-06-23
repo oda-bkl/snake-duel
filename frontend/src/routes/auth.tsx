@@ -16,18 +16,25 @@ function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-md">
-        <Link to="/" className="block text-center font-bold text-2xl mb-6">▰▰ Snake Arena</Link>
+        <Link to="/" className="block text-center font-bold text-2xl mb-6">
+          ▰▰ Snake Arena
+        </Link>
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <Tabs defaultValue="login">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Log in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
-            <TabsContent value="login"><LoginForm /></TabsContent>
-            <TabsContent value="signup"><SignupForm /></TabsContent>
+            <TabsContent value="login">
+              <LoginForm />
+            </TabsContent>
+            <TabsContent value="signup">
+              <SignupForm />
+            </TabsContent>
           </Tabs>
           <p className="mt-4 text-xs text-muted-foreground text-center">
-            Demo account: <code className="font-mono">demo</code> / <code className="font-mono">demo</code>
+            Demo account: <code className="font-mono">demo</code> /{" "}
+            <code className="font-mono">demo</code>
           </p>
         </div>
       </div>
@@ -60,13 +67,28 @@ function LoginForm() {
     >
       <div>
         <Label htmlFor="lu">Username</Label>
-        <Input id="lu" value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" required />
+        <Input
+          id="lu"
+          value={u}
+          onChange={(e) => setU(e.target.value)}
+          autoComplete="username"
+          required
+        />
       </div>
       <div>
         <Label htmlFor="lp">Password</Label>
-        <Input id="lp" type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" required />
+        <Input
+          id="lp"
+          type="password"
+          value={p}
+          onChange={(e) => setP(e.target.value)}
+          autoComplete="current-password"
+          required
+        />
       </div>
-      <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Log in"}</Button>
+      <Button type="submit" className="w-full" disabled={busy}>
+        {busy ? "Signing in…" : "Log in"}
+      </Button>
     </form>
   );
 }
@@ -100,9 +122,18 @@ function SignupForm() {
       </div>
       <div>
         <Label htmlFor="sp">Password</Label>
-        <Input id="sp" type="password" value={p} onChange={(e) => setP(e.target.value)} required minLength={3} />
+        <Input
+          id="sp"
+          type="password"
+          value={p}
+          onChange={(e) => setP(e.target.value)}
+          required
+          minLength={3}
+        />
       </div>
-      <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</Button>
+      <Button type="submit" className="w-full" disabled={busy}>
+        {busy ? "Creating…" : "Create account"}
+      </Button>
     </form>
   );
 }

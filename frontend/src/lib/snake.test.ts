@@ -48,7 +48,11 @@ describe("snake game logic", () => {
     const g = createGame("walls", 20);
     // Force a U-turn-prone shape: snake of length 5 in an L; then move into self
     const snake = [
-      { x: 5, y: 5 }, { x: 5, y: 6 }, { x: 6, y: 6 }, { x: 6, y: 5 }, { x: 7, y: 5 },
+      { x: 5, y: 5 },
+      { x: 5, y: 6 },
+      { x: 6, y: 6 },
+      { x: 6, y: 5 },
+      { x: 7, y: 5 },
     ];
     const s = { ...g, snake, dir: "up" as const, pendingDir: "up" as const, food: { x: 0, y: 0 } };
     // moving up from (5,5) — new head (5,4); not self. Try left from snake[0] going down:
@@ -57,7 +61,11 @@ describe("snake game logic", () => {
     const tight = {
       ...g,
       snake: [
-        { x: 5, y: 5 }, { x: 4, y: 5 }, { x: 4, y: 6 }, { x: 5, y: 6 }, { x: 5, y: 7 },
+        { x: 5, y: 5 },
+        { x: 4, y: 5 },
+        { x: 4, y: 6 },
+        { x: 5, y: 6 },
+        { x: 5, y: 7 },
       ],
       dir: "down" as const,
       pendingDir: "down" as const,
@@ -69,7 +77,10 @@ describe("snake game logic", () => {
   });
 
   it("spawnFood never lands on the snake", () => {
-    const snake = [{ x: 0, y: 0 }, { x: 0, y: 1 }];
+    const snake = [
+      { x: 0, y: 0 },
+      { x: 0, y: 1 },
+    ];
     const f = spawnFood(snake, 5, () => 0.5);
     expect(snake.find((p) => p.x === f.x && p.y === f.y)).toBeUndefined();
   });

@@ -22,7 +22,13 @@ function Watch() {
 
         {games.length === 0 ? (
           <div className="mt-10 rounded-xl border border-dashed border-border p-10 text-center">
-            <p className="text-muted-foreground">No live games. <Link to="/play" className="underline text-foreground">Start one</Link>.</p>
+            <p className="text-muted-foreground">
+              No live games.{" "}
+              <Link to="/play" className="underline text-foreground">
+                Start one
+              </Link>
+              .
+            </p>
           </div>
         ) : (
           <ul className="mt-6 grid sm:grid-cols-2 gap-3">
@@ -35,14 +41,18 @@ function Watch() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">@{g.username}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground capitalize">{g.mode}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground capitalize">
+                      {g.mode}
+                    </span>
                   </div>
                   <div className="mt-2 flex items-baseline justify-between">
                     <span className="text-sm text-muted-foreground">Score</span>
                     <span className="font-black text-2xl tabular-nums">{g.score}</span>
                   </div>
                   <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className={`size-2 rounded-full ${g.alive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+                    <span
+                      className={`size-2 rounded-full ${g.alive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}
+                    />
                     {g.alive ? "Live" : "Ended"}
                   </div>
                 </Link>

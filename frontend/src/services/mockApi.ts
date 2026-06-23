@@ -27,10 +27,38 @@ function seedDB(): MockDB {
       { id: "u_alice", username: "alice", password: "alice" },
     ],
     scores: [
-      { id: "s1", userId: "u_demo", username: "demo", mode: "walls", score: 42, createdAt: Date.now() - 100000 },
-      { id: "s2", userId: "u_alice", username: "alice", mode: "walls", score: 31, createdAt: Date.now() - 80000 },
-      { id: "s3", userId: "u_demo", username: "demo", mode: "wrap", score: 88, createdAt: Date.now() - 50000 },
-      { id: "s4", userId: "u_alice", username: "alice", mode: "wrap", score: 64, createdAt: Date.now() - 30000 },
+      {
+        id: "s1",
+        userId: "u_demo",
+        username: "demo",
+        mode: "walls",
+        score: 42,
+        createdAt: Date.now() - 100000,
+      },
+      {
+        id: "s2",
+        userId: "u_alice",
+        username: "alice",
+        mode: "walls",
+        score: 31,
+        createdAt: Date.now() - 80000,
+      },
+      {
+        id: "s3",
+        userId: "u_demo",
+        username: "demo",
+        mode: "wrap",
+        score: 88,
+        createdAt: Date.now() - 50000,
+      },
+      {
+        id: "s4",
+        userId: "u_alice",
+        username: "alice",
+        mode: "wrap",
+        score: 64,
+        createdAt: Date.now() - 30000,
+      },
     ],
   };
   saveDB(db);
@@ -83,7 +111,10 @@ export const mockApi: ApiService = {
     const user = { id: uid("u"), username: username.trim(), password };
     db.users.push(user);
     saveDB(db);
-    const session: AuthSession = { user: { id: user.id, username: user.username }, token: uid("t") };
+    const session: AuthSession = {
+      user: { id: user.id, username: user.username },
+      token: uid("t"),
+    };
     saveSession(session);
     return session;
   },

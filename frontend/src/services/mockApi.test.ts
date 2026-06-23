@@ -51,8 +51,14 @@ describe("mockApi active games", () => {
   it("publishes and lists active games, then ends them", async () => {
     await mockApi.login("demo", "demo");
     const g = await mockApi.upsertActiveGame({
-      id: "g1", userId: "u_demo", mode: "wrap", score: 0,
-      snake: [{ x: 0, y: 0 }], food: { x: 1, y: 1 }, gridSize: 10, alive: true,
+      id: "g1",
+      userId: "u_demo",
+      mode: "wrap",
+      score: 0,
+      snake: [{ x: 0, y: 0 }],
+      food: { x: 1, y: 1 },
+      gridSize: 10,
+      alive: true,
     });
     expect(g.username).toBe("demo");
     const list = await mockApi.listActiveGames();
@@ -67,8 +73,14 @@ describe("mockApi active games", () => {
     const received: Array<number> = [];
     const unsub = mockApi.subscribeActiveGames((list) => received.push(list.length));
     await mockApi.upsertActiveGame({
-      id: "g2", userId: "u_demo", mode: "walls", score: 0,
-      snake: [{ x: 0, y: 0 }], food: { x: 1, y: 1 }, gridSize: 10, alive: true,
+      id: "g2",
+      userId: "u_demo",
+      mode: "walls",
+      score: 0,
+      snake: [{ x: 0, y: 0 }],
+      food: { x: 1, y: 1 },
+      gridSize: 10,
+      alive: true,
     });
     unsub();
     expect(received.at(-1)).toBe(1);

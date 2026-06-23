@@ -42,7 +42,13 @@ export function SnakeBoard({ state, size = 480, className }: Props) {
     ctx.fillStyle = food;
     const fpad = cell * 0.15;
     ctx.beginPath();
-    ctx.arc(state.food.x * cell + cell / 2, state.food.y * cell + cell / 2, cell / 2 - fpad, 0, Math.PI * 2);
+    ctx.arc(
+      state.food.x * cell + cell / 2,
+      state.food.y * cell + cell / 2,
+      cell / 2 - fpad,
+      0,
+      Math.PI * 2,
+    );
     ctx.fill();
 
     // snake

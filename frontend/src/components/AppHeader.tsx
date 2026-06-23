@@ -17,9 +17,27 @@ export function AppHeader() {
           <span>Snake Arena</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
-          <Link to="/play" className="px-3 py-1.5 rounded-md hover:bg-accent" activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}>Play</Link>
-          <Link to="/leaderboard" className="px-3 py-1.5 rounded-md hover:bg-accent" activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}>Leaderboard</Link>
-          <Link to="/watch" className="px-3 py-1.5 rounded-md hover:bg-accent" activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}>Watch</Link>
+          <Link
+            to="/play"
+            className="px-3 py-1.5 rounded-md hover:bg-accent"
+            activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}
+          >
+            Play
+          </Link>
+          <Link
+            to="/leaderboard"
+            className="px-3 py-1.5 rounded-md hover:bg-accent"
+            activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}
+          >
+            Leaderboard
+          </Link>
+          <Link
+            to="/watch"
+            className="px-3 py-1.5 rounded-md hover:bg-accent"
+            activeProps={{ className: "px-3 py-1.5 rounded-md bg-accent" }}
+          >
+            Watch
+          </Link>
           <Button size="sm" variant="ghost" onClick={toggle} aria-label="Toggle theme">
             {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </Button>
@@ -42,7 +60,10 @@ export function AppHeader() {
               </Button>
             </div>
           ) : (
-            <Link to="/auth" className="ml-2 px-3 py-1.5 rounded-md bg-primary text-primary-foreground font-medium">
+            <Link
+              to="/auth"
+              className="ml-2 px-3 py-1.5 rounded-md bg-primary text-primary-foreground font-medium"
+            >
               Sign in
             </Link>
           )}
