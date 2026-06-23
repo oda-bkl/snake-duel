@@ -20,9 +20,9 @@ export interface ApiService {
   subscribeActiveGames(cb: (games: ActiveGame[]) => void): () => void;
 }
 
-import { mockApi } from "./mockApi";
+import { httpApi } from "./httpApi";
 
-let _api: ApiService = mockApi;
+let _api: ApiService = httpApi;
 
 export function getApi(): ApiService {
   return _api;
