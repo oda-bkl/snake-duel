@@ -13,7 +13,6 @@ uv run python
 
 ## General notes
 - regularly commit code to git
-- the frontend code was written by an external freelancer i don't necessarily trust. 
 - Use red-green-refactor for all business logic and API endpoints. Write the failing test first, then the implementation. Exemptions: database migrations, config files, scripts.
 - At the **start** of each working session, read `llmwiki/index.md` and any entries relevant to today's task before writing any code.
 - At the **end** of each working session, review what was built and update the wiki before closing. Prompt: "Update the wiki with anything learned this session."

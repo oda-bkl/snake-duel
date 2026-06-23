@@ -1,0 +1,360 @@
+openapi: "3.1.0"
+
+info:
+  title: Snake Duel API
+  version: "1.0.0"
+
+servers:
+  - url: /api
+
+security: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    GameMode:
+      type: string
+      enum: [walls, wrap]
+
+    User:
+      type: object
+      required: [id, username]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+
+    AuthSession:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+
+    ScoreEntry:
+      type: object
+      required: [id, userId, username, mode, score, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        mode:
+          $ref: "#/components/schemas/GameMode"
+        score:
+          type: integer
+        createdAt:
+          type: integer
+          description: Unix timestamp (milliseconds)
+
+    Point:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: integer
+        y:
+          type: integer
+
+    ActiveGame:
+      type: object
+      required: [id, userId, username, mode, score, snake, food, gridSize, alive, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        mode:
+          $ref: "#/components/schemas/GameMode"
+        score:
+          type: integer
+        snake:
+          type: array
+          items:
+            $ref: "#/components/schemas/Point"
+        food:
+          $ref: "#/components/schemas/Point"
+        gridSize:
+          type: integer
+        alive:
+          type: boolean
+        updatedAt:
+          type: integer
+          description: Unix timestamp (milliseconds)
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+paths:
+  /auth/signup:
+    post:
+      summary: Create a new account
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          description: Validation error or username taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      summary: Log in with existing credentials
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      summary: Invalidate the current session token
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Logged out
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/session:
+    get:
+      summary: Return the session for the current token, or null if unauthenticated
+      operationId: currentSession
+      responses:
+        "200":
+          description: Current session (null body when no valid token)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthSession"
+                  - type: "null"
+
+  /scores:
+    post:
+      summary: Submit a score for the authenticated user
+      operationId: submitScore
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode, score]
+              properties:
+                mode:
+                  $ref: "#/components/schemas/GameMode"
+                score:
+                  type: integer
+      responses:
+        "200":
+          description: Score recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreEntry"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /scores/leaderboard:
+    get:
+      summary: Get the top scores for a game mode
+      operationId: getLeaderboard
+      parameters:
+        - name: mode
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/GameMode"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Ordered list of top scores (highest first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreEntry"
+
+  /games/active:
+    get:
+      summary: List all currently active games
+      operationId: listActiveGames
+      responses:
+        "200":
+          description: Active games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActiveGame"
+
+    post:
+      summary: Create or update an active game (upsert)
+      description: |
+        Omit `id` to create a new game; include `id` to update an existing one.
+        The server fills in `username` from the authenticated user and sets `updatedAt`.
+      operationId: upsertActiveGame
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, mode, score, snake, food, gridSize, alive]
+              properties:
+                id:
+                  type: string
+                  description: Omit to create; include to update
+                userId:
+                  type: string
+                mode:
+                  $ref: "#/components/schemas/GameMode"
+                score:
+                  type: integer
+                snake:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Point"
+                food:
+                  $ref: "#/components/schemas/Point"
+                gridSize:
+                  type: integer
+                alive:
+                  type: boolean
+      responses:
+        "200":
+          description: The created or updated game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveGame"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /games/active/{id}:
+    get:
+      summary: Get a single active game by ID
+      operationId: getActiveGame
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The game, or null if it no longer exists
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ActiveGame"
+                  - type: "null"
+
+  /games/active/{id}/end:
+    post:
+      summary: Mark an active game as ended and remove it from the active list
+      operationId: endActiveGame
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Game ended
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
