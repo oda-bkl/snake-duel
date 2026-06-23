@@ -166,7 +166,7 @@ async def test_subscribe_active_games_sse_initial_data(alice: dict):
         snake=[Point(x=3, y=3)], food=Point(x=7, y=7),
         gridSize=20, alive=True, updatedAt=1000,
     )
-    store.games["g_test1"] = game  # bypass pub/sub
+    store._seed_game(game)
 
     result = await _call_sse_endpoint("/api/games/stream")
     data = json.loads(result["first_event"])
@@ -182,7 +182,7 @@ async def test_subscribe_single_game_sse_found(alice: dict):
         snake=[Point(x=3, y=3)], food=Point(x=7, y=7),
         gridSize=20, alive=True, updatedAt=1000,
     )
-    store.games["g_test1"] = game
+    store._seed_game(game)
 
     result = await _call_sse_endpoint("/api/games/g_test1/stream")
     assert result["status"] == 200
@@ -244,7 +244,7 @@ async def test_store_global_pubsub_on_delete(alice: dict):
         snake=[Point(x=0, y=0)], food=Point(x=1, y=1),
         gridSize=20, alive=True, updatedAt=3000,
     )
-    store.games["g_del"] = game
+    store._seed_game(game)
     q = store.subscribe_global()
     try:
         store.delete_game("g_del")

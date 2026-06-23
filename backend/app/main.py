@@ -1,9 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .database import init_db
 from .routers import auth, games, scores
 
-app = FastAPI(title="Snake Arena API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="Snake Arena API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

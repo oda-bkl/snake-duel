@@ -3,7 +3,6 @@
 from fastapi import Header, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 
-from .security import hash_password, verify_password
 from .store import UserRecord, store
 
 

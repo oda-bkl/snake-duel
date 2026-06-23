@@ -1,23 +1,35 @@
 """Shared fixtures for all test modules."""
 
+import os
+
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+
 import pytest
 from fastapi.testclient import TestClient
 
 pytest_plugins = ("anyio",)
 
+from app.database import Base, engine, get_session, UserRow, TokenRow, ScoreRow, GameRow
 from app.main import app
-from app.store import Store, UserRecord, store
 from app.security import hash_password
+from app.store import UserRecord, store
+
+
+@pytest.fixture(autouse=True, scope="session")
+def setup_db():
+    Base.metadata.create_all(engine)
+    yield
+    Base.metadata.drop_all(engine)
 
 
 @pytest.fixture(autouse=True)
-def reset_store():
-    """Reset store to a clean empty state before each test."""
-    store.users.clear()
-    store._by_username.clear()
-    store.tokens.clear()
-    store.scores.clear()
-    store.games.clear()
+def reset_store(setup_db):
+    """Truncate all DB tables and reset SSE state before each test."""
+    with get_session() as session:
+        session.query(GameRow).delete()
+        session.query(ScoreRow).delete()
+        session.query(TokenRow).delete()
+        session.query(UserRow).delete()
     store._global_subs.clear()
     store._game_subs.clear()
     yield
