@@ -1,0 +1,11 @@
+.git/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+backend/.venv/
+backend/*.db
+frontend/node_modules/
+frontend/package-lock.json
+frontend/.output/
+frontend/dist/
+**/.env

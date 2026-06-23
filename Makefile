@@ -1,4 +1,4 @@
-.PHONY: install dev backend frontend backend-tests backend-integration-tests frontend-tests test
+.PHONY: install dev backend frontend backend-tests backend-integration-tests frontend-tests test docker-build docker-run
 
 install:
 	cd backend && uv sync --all-extras
@@ -26,3 +26,9 @@ frontend-tests:
 	cd frontend && npm test
 
 test: backend-tests backend-integration-tests frontend-tests
+
+docker-build:
+	docker build -t snake-duel .
+
+docker-run:
+	docker run -p 8000:8000 snake-duel
