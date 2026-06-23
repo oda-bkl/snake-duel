@@ -32,12 +32,19 @@ function Leaderboard() {
 
 function Board({ mode }: { mode: GameMode }) {
   const [rows, setRows] = useState<ScoreEntry[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
-    getApi().getLeaderboard(mode, 10).then((r) => !cancelled && setRows(r));
+    setRows(null);
+    setError(null);
+    getApi()
+      .getLeaderboard(mode, 10)
+      .then((r) => { if (!cancelled) setRows(r); })
+      .catch((e) => { if (!cancelled) setError((e as Error).message); });
     return () => { cancelled = true; };
   }, [mode]);
 
+  if (error) return <p className="mt-6 text-destructive">{error}</p>;
   if (!rows) return <p className="mt-6 text-muted-foreground">Loading…</p>;
   if (rows.length === 0) return <p className="mt-6 text-muted-foreground">No scores yet. Be the first!</p>;
 

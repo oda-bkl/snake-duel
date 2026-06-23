@@ -135,7 +135,8 @@ export const mockApi: ApiService = {
   async upsertActiveGame(game) {
     const session = loadSession();
     const username = session?.user.username ?? "guest";
-    const full: ActiveGame = { ...game, username, updatedAt: Date.now() };
+    const id = game.id ?? uid("g");
+    const full: ActiveGame = { ...game, id, username, updatedAt: Date.now() };
     activeGames.set(full.id, full);
     notifyGame(full.id);
     return full;

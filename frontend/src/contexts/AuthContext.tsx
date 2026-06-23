@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getApi } from "@/services/api";
+import { getApi, setAuthToken } from "@/services/api";
 import type { User } from "@/services/types";
 
 interface AuthCtx {
@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     getApi().currentSession().then((s) => {
       setUser(s?.user ?? null);
+      setAuthToken(s?.token ?? null);
       setLoading(false);
     });
   }, []);
@@ -28,14 +29,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     async login(u, p) {
       const s = await getApi().login(u, p);
+      setAuthToken(s.token);
       setUser(s.user);
     },
     async signup(u, p) {
       const s = await getApi().signup(u, p);
+      setAuthToken(s.token);
       setUser(s.user);
     },
     async logout() {
       await getApi().logout();
+      setAuthToken(null);
       setUser(null);
     },
   };

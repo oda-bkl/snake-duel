@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { SnakeBoard } from "@/components/SnakeBoard";
 import { Button } from "@/components/ui/button";
@@ -22,15 +22,17 @@ function Play() {
   const [mode, setMode] = useState<GameMode>("walls");
   const [state, setState] = useState<GameState>(() => createGame("walls"));
   const [running, setRunning] = useState(false);
-  const gameIdRef = useRef<string>(`g_${Math.random().toString(36).slice(2, 10)}`);
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const gameIdRef = useRef<string | null>(null);
+  const runningRef = useRef(running);
+  runningRef.current = running;
+  const userRef = useRef(user);
+  userRef.current = user;
 
   const reset = useCallback((m: GameMode) => {
     setMode(m);
     setState(createGame(m));
     setRunning(false);
-    gameIdRef.current = `g_${Math.random().toString(36).slice(2, 10)}`;
+    gameIdRef.current = null;
   }, []);
 
   // Keyboard
@@ -63,12 +65,12 @@ function Play() {
     return () => clearInterval(id);
   }, [running, state.alive]);
 
-  // Publish active game for spectators
+  // Publish active game for spectators; store server-returned id for subsequent updates
   useEffect(() => {
     if (!running) return;
     const api = getApi();
     api.upsertActiveGame({
-      id: gameIdRef.current,
+      id: gameIdRef.current ?? undefined,
       userId: user?.id ?? "guest",
       mode: state.mode,
       score: state.score,
@@ -76,23 +78,21 @@ function Play() {
       food: state.food,
       gridSize: state.gridSize,
       alive: state.alive,
-    });
+    }).then((g) => { gameIdRef.current = g.id; }).catch(() => {});
   }, [state, running, user]);
 
   // Handle death: submit score, end active game
   useEffect(() => {
     if (state.alive) return;
     const api = getApi();
-    api.endActiveGame(gameIdRef.current);
-    if (running && user && state.score > 0) {
+    if (gameIdRef.current) api.endActiveGame(gameIdRef.current);
+    if (runningRef.current && userRef.current && state.score > 0) {
       api.submitScore({ mode: state.mode, score: state.score })
         .then(() => toast.success(`Score saved: ${state.score}`))
         .catch((e) => toast.error((e as Error).message));
     }
     setRunning(false);
-  }, [state.alive]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const high = useMemo(() => state.score, [state.score]);
+  }, [state.alive, state.score, state.mode]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -106,7 +106,7 @@ function Play() {
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-baseline justify-between">
               <h2 className="font-semibold text-lg">Score</h2>
-              <span className="text-4xl font-black tabular-nums">{high}</span>
+              <span className="text-4xl font-black tabular-nums">{state.score}</span>
             </div>
             <div className="mt-1 text-sm text-muted-foreground">Mode: <span className="font-medium text-foreground capitalize">{state.mode}</span></div>
           </div>
