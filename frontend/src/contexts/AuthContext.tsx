@@ -40,9 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(s.user);
     },
     async logout() {
-      await getApi().logout();
+      // Clear local state first so the UI updates immediately even if the
+      // server call fails (e.g. backend restarted and token is already gone).
       setAuthToken(null);
       setUser(null);
+      await getApi().logout().catch(() => {});
     },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

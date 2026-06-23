@@ -24,6 +24,12 @@ install-frontend:  ## Install Node dependencies (npm)
 
 # ── Dev servers ───────────────────────────────────────────────────────────────
 
+dev:  ## Start backend (:8000) and frontend (:8080) together; Ctrl-C stops both
+	@trap 'kill 0' INT TERM; \
+	  (cd backend && uv run uvicorn main:app --reload --port 8000) & \
+	  (cd frontend && npm run dev) & \
+	  wait
+
 dev-backend:  ## Start the FastAPI dev server on :8000
 	cd backend && uv run uvicorn main:app --reload --port 8000
 

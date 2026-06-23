@@ -9,9 +9,9 @@ timestamp: 2026-06-23
 
 `src/services/api.ts` exports `ApiService` (interface), `getApi()`, `setApi()`, `getAuthToken()`, `setAuthToken()`.
 
-- Default implementation: `mockApi` (localStorage + in-memory pub/sub).
-- Real implementation: `realApi` (HTTP via `apiFetch`, polling for subscribe*).
-- Swap at runtime: call `setApi(realApi)` at app startup to enable the real backend.
+- Default implementation: `realApi` (HTTP via `apiFetch`, polling for subscribe*).
+- Mock implementation: `mockApi` (localStorage + in-memory pub/sub) — used only in tests; import it directly.
+- `setApi()` still exists for overriding at runtime if needed.
 
 `setApi` is the only place to swap; all consumers call `getApi()` so they are unaware of the transport.
 

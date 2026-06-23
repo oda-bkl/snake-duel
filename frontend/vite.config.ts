@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      proxy: {
+        // In Codespaces each port has its own hostname, so relative /api calls
+        // would hit the frontend server. Proxy them to the FastAPI backend.
+        "/api": "http://localhost:8000",
+      },
+    },
+  },
 });

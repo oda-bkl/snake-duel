@@ -4,26 +4,24 @@ type Theme = "light" | "dark";
 
 const STORAGE_KEY = "snake.theme";
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  // The blocking script in <head> already applied the correct class before
+  // React loaded, so we read the DOM as the source of truth after hydration.
+  // Start with "dark" to match the SSR default (no flash before the effect runs).
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
+  }, []);
 
-  const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const toggle = () => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      document.documentElement.classList.toggle("dark", next === "dark");
+      localStorage.setItem(STORAGE_KEY, next);
+      return next;
+    });
+  };
 
   return { theme, toggle };
 }

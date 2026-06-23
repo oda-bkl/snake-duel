@@ -22,3 +22,5 @@
 - [gotchas/stale-closure-death-effect.md](gotchas/stale-closure-death-effect.md) — Stale closure bug in play.tsx death effect; fix using refs
 - [gotchas/passlib-bcrypt-compat.md](gotchas/passlib-bcrypt-compat.md) — passlib crashes with bcrypt>=4; use bcrypt directly instead
 - [gotchas/bun-not-installed.md](gotchas/bun-not-installed.md) — Codespace has npm not bun; all frontend Makefile targets use npm
+- [gotchas/ssr-hydration-theme-mismatch.md](gotchas/ssr-hydration-theme-mismatch.md) — useTheme reading localStorage in useState initializer causes SSR/client mismatch
+- [gotchas/codespaces-api-proxy.md](gotchas/codespaces-api-proxy.md) — Relative /api paths hit the Vite server in Codespaces; fix via Vite proxy to :8000
