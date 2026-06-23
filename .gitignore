@@ -1,18 +1,59 @@
-# Python
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *.egg-info/
-.venv/
+*.egg
 dist/
+build/
+.eggs/
 
-# Database
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.python-version
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy / pyright
+.mypy_cache/
+.pyright/
+pyrightconfig.json
+
+# ── Database ─────────────────────────────────────────────────────────────────
 *.db
 *.sqlite
 *.sqlite3
 
-# Environment
+# ── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+dist/
+.output/
+
+# Vite / TanStack Start build output
+.vinxi/
+
+# Generated route tree (regenerated at dev/build time)
+frontend/src/routeTree.gen.ts
+
+# ── Environment & secrets ─────────────────────────────────────────────────────
 .env
 .env.*
+!.env.example
 
-# Node
-node_modules/
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editors ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
