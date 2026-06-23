@@ -1,0 +1,80 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# uv / pip / virtualenv
+.venv/
+venv/
+env/
+.uv/
+uv.lock          # keep if you want reproducible installs; delete this line if so
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# mypy / ruff / pyright caches
+.mypy_cache/
+.ruff_cache/
+pyrightconfig.json.bak
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.output/
+frontend/.vinxi/
+frontend/.nitro/
+frontend/.tanstack/
+frontend/package-lock.json   # project uses bun.lock; npm lock is noise
+
+# Vite / build artefacts
+*.local
+
+# ── Environment & secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example          # keep the example template
+.dev.vars              # Wrangler / Cloudflare dev secrets
+
+# ── Database ──────────────────────────────────────────────────────────────────
+# SQLite (likely backend storage)
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Editor & OS ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.sw?
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── Cloudflare / Wrangler ─────────────────────────────────────────────────────
+.wrangler/
