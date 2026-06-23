@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 
+import anyio
 from fastapi import APIRouter, Header
 from fastapi.responses import Response, StreamingResponse
 
@@ -10,6 +11,8 @@ from ..models import ActiveGame, UpsertGameRequest
 from ..store import store
 
 router = APIRouter(tags=["games"])
+
+_TIMEOUT = object()  # sentinel distinguishing a timeout from a None game value
 
 
 def _now_ms() -> int:
@@ -25,18 +28,20 @@ async def list_active_games() -> list[ActiveGame]:
 @router.get("/games/stream")
 async def subscribe_active_games() -> StreamingResponse:
     async def generator():
-        q = store.subscribe_global()
+        recv = store.subscribe_global()
         try:
             games = store.list_active_games()
             yield f"data: {json.dumps([g.model_dump(mode='json') for g in games])}\n\n"
             while True:
-                try:
-                    games = await asyncio.wait_for(q.get(), timeout=25.0)
-                    yield f"data: {json.dumps([g.model_dump(mode='json') for g in games])}\n\n"
-                except asyncio.TimeoutError:
+                result = _TIMEOUT
+                with anyio.move_on_after(25.0):
+                    result = await recv.receive()
+                if result is _TIMEOUT:
                     yield ": ping\n\n"
+                else:
+                    yield f"data: {json.dumps([g.model_dump(mode='json') for g in result])}\n\n"
         finally:
-            store.unsubscribe_global(q)
+            store.unsubscribe_global(recv)
 
     return StreamingResponse(generator(), media_type="text/event-stream")
 
@@ -80,7 +85,7 @@ async def end_active_game(id: str) -> Response:
     if game is not None:
         ended = game.model_copy(update={"alive": False, "updatedAt": _now_ms()})
         store.upsert_game(ended)
-        asyncio.get_event_loop().call_later(5.0, store.delete_game, id)
+        asyncio.get_running_loop().call_later(5.0, store.delete_game, id)
     return Response(status_code=204)
 
 
@@ -88,19 +93,22 @@ async def end_active_game(id: str) -> Response:
 @router.get("/games/{id}/stream")
 async def subscribe_active_game(id: str) -> StreamingResponse:
     async def generator():
-        q = store.subscribe_game(id)
+        recv = store.subscribe_game(id)
         try:
             game = store.get_game(id)
             data = game.model_dump(mode='json') if game else None
             yield f"data: {json.dumps(data)}\n\n"
             while True:
-                try:
-                    game = await asyncio.wait_for(q.get(), timeout=25.0)
+                result = _TIMEOUT
+                with anyio.move_on_after(25.0):
+                    result = await recv.receive()
+                if result is _TIMEOUT:
+                    yield ": ping\n\n"
+                else:
+                    game = result
                     data = game.model_dump(mode='json') if game else None
                     yield f"data: {json.dumps(data)}\n\n"
-                except asyncio.TimeoutError:
-                    yield ": ping\n\n"
         finally:
-            store.unsubscribe_game(id, q)
+            store.unsubscribe_game(id, recv)
 
     return StreamingResponse(generator(), media_type="text/event-stream")

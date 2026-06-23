@@ -1,10 +1,11 @@
 """Store: persistent data via SQLAlchemy + in-memory SSE pub/sub."""
 
-import asyncio
 import json
 import secrets
 from dataclasses import dataclass
 
+from anyio import ClosedResourceError, WouldBlock, create_memory_object_stream
+from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from sqlalchemy import func
 
 from .database import (
@@ -15,6 +16,9 @@ from .database import (
     get_session,
 )
 from .models import ActiveGame, GameMode, Point, ScoreEntry, User
+
+# Type alias for a subscriber pair (send, recv)
+_Sub = tuple[MemoryObjectSendStream, MemoryObjectReceiveStream]
 
 
 @dataclass
@@ -74,8 +78,8 @@ def _game_to_row(game: ActiveGame) -> GameRow:
 
 class Store:
     def __init__(self) -> None:
-        self._global_subs: list[asyncio.Queue] = []
-        self._game_subs: dict[str, list[asyncio.Queue]] = {}
+        self._global_subs: list[_Sub] = []
+        self._game_subs: dict[str, list[_Sub]] = {}
 
     # ---- Users ----
 
@@ -185,39 +189,41 @@ class Store:
 
     # ---- SSE pub/sub ----
 
-    def subscribe_global(self) -> asyncio.Queue:
-        q: asyncio.Queue = asyncio.Queue()
-        self._global_subs.append(q)
-        return q
+    def subscribe_global(self) -> MemoryObjectReceiveStream:
+        send, recv = create_memory_object_stream(max_buffer_size=64)
+        self._global_subs.append((send, recv))
+        return recv
 
-    def unsubscribe_global(self, q: asyncio.Queue) -> None:
-        try:
-            self._global_subs.remove(q)
-        except ValueError:
-            pass
+    def unsubscribe_global(self, recv: MemoryObjectReceiveStream) -> None:
+        self._global_subs = [(s, r) for s, r in self._global_subs if r is not recv]
+        recv.close()
 
-    def subscribe_game(self, game_id: str) -> asyncio.Queue:
-        q: asyncio.Queue = asyncio.Queue()
-        self._game_subs.setdefault(game_id, []).append(q)
-        return q
+    def subscribe_game(self, game_id: str) -> MemoryObjectReceiveStream:
+        send, recv = create_memory_object_stream(max_buffer_size=64)
+        self._game_subs.setdefault(game_id, []).append((send, recv))
+        return recv
 
-    def unsubscribe_game(self, game_id: str, q: asyncio.Queue) -> None:
+    def unsubscribe_game(self, game_id: str, recv: MemoryObjectReceiveStream) -> None:
         subs = self._game_subs.get(game_id, [])
-        try:
-            subs.remove(q)
-        except ValueError:
-            pass
-        if not subs:
+        self._game_subs[game_id] = [(s, r) for s, r in subs if r is not recv]
+        if not self._game_subs[game_id]:
             self._game_subs.pop(game_id, None)
+        recv.close()
 
     def _notify_global(self) -> None:
         games = self.list_active_games()
-        for q in list(self._global_subs):
-            q.put_nowait(games)
+        for send, _ in list(self._global_subs):
+            try:
+                send.send_nowait(games)
+            except (WouldBlock, ClosedResourceError):
+                pass
 
     def _notify_game(self, game_id: str, game: ActiveGame | None) -> None:
-        for q in list(self._game_subs.get(game_id, [])):
-            q.put_nowait(game)
+        for send, _ in list(self._game_subs.get(game_id, [])):
+            try:
+                send.send_nowait(game)
+            except (WouldBlock, ClosedResourceError):
+                pass
 
 
 store = Store()

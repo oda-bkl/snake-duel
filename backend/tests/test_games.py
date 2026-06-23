@@ -3,6 +3,7 @@
 import asyncio
 import json
 
+import anyio
 import pytest
 from fastapi.testclient import TestClient
 
@@ -116,17 +117,14 @@ async def _call_sse_endpoint(path: str, headers: list | None = None) -> dict:
     messages: list[dict] = []
 
     async def receive():
-        await asyncio.sleep(100)  # never closes — SSE is long-lived
+        await anyio.sleep(100)  # never closes — SSE is long-lived
         return {"type": "http.disconnect"}
 
     async def send(message: dict) -> None:
         messages.append(message)
 
-    try:
-        async with asyncio.timeout(2.0):
-            await app(scope, receive, send)
-    except TimeoutError:
-        pass  # expected — SSE never ends
+    with anyio.move_on_after(2.0):
+        await app(scope, receive, send)
 
     status = next((m["status"] for m in messages if m["type"] == "http.response.start"), None)
     raw_headers = dict(
@@ -204,7 +202,7 @@ async def test_subscribe_single_game_sse_not_found():
 
 @pytest.mark.anyio
 async def test_store_global_pubsub_on_upsert(alice: dict):
-    q = store.subscribe_global()
+    recv = store.subscribe_global()
     try:
         game = ActiveGame(
             id="g_ps1", userId=alice["id"], username=alice["username"],
@@ -213,15 +211,15 @@ async def test_store_global_pubsub_on_upsert(alice: dict):
             gridSize=20, alive=True, updatedAt=1000,
         )
         store.upsert_game(game)
-        update = q.get_nowait()
+        update = recv.receive_nowait()
         assert any(g.id == "g_ps1" for g in update)
     finally:
-        store.unsubscribe_global(q)
+        store.unsubscribe_global(recv)
 
 
 @pytest.mark.anyio
 async def test_store_game_pubsub_on_upsert(alice: dict):
-    q = store.subscribe_game("g_ps2")
+    recv = store.subscribe_game("g_ps2")
     try:
         game = ActiveGame(
             id="g_ps2", userId=alice["id"], username=alice["username"],
@@ -230,10 +228,10 @@ async def test_store_game_pubsub_on_upsert(alice: dict):
             gridSize=20, alive=True, updatedAt=2000,
         )
         store.upsert_game(game)
-        update = q.get_nowait()
+        update = recv.receive_nowait()
         assert update.id == "g_ps2"
     finally:
-        store.unsubscribe_game("g_ps2", q)
+        store.unsubscribe_game("g_ps2", recv)
 
 
 @pytest.mark.anyio
@@ -245,10 +243,10 @@ async def test_store_global_pubsub_on_delete(alice: dict):
         gridSize=20, alive=True, updatedAt=3000,
     )
     store._seed_game(game)
-    q = store.subscribe_global()
+    recv = store.subscribe_global()
     try:
         store.delete_game("g_del")
-        update = q.get_nowait()
+        update = recv.receive_nowait()
         assert not any(g.id == "g_del" for g in update)
     finally:
-        store.unsubscribe_global(q)
+        store.unsubscribe_global(recv)
